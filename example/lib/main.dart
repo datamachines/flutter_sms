@@ -1,9 +1,35 @@
+import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_sms/flutter_sms.dart';
 
-void main() => runApp(MyApp());
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
+
+// The existing imports
+// !! Keep your existing impots here !!
+
+/// main is entry point of Flutter application
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (!kIsWeb) _setTargetPlatformForDesktop();
+  return runApp(MyApp());
+}
+
+/// If the current platform is desktop, override the default platform to
+/// a supported platform (iOS for macOS, Android for Linux and Windows).
+/// Otherwise, do nothing.
+void _setTargetPlatformForDesktop() {
+  TargetPlatform targetPlatform;
+  if (Platform.isMacOS) {
+    targetPlatform = TargetPlatform.iOS;
+  } else if (Platform.isLinux || Platform.isWindows) {
+    targetPlatform = TargetPlatform.android;
+  }
+  if (targetPlatform != null) {
+    debugDefaultTargetPlatformOverride = targetPlatform;
+  }
+}
 
 class MyApp extends StatefulWidget {
   @override
@@ -11,9 +37,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late TextEditingController _controllerPeople, _controllerMessage;
-  String? _message, body;
-  String _canSendSMSMessage = 'Check is not run.';
+  TextEditingController _controllerPeople, _controllerMessage;
+  String _message, body;
+  String _canSendSMSMessage = "Check is not run.";
   List<String> people = [];
 
   @override
@@ -27,50 +53,60 @@ class _MyAppState extends State<MyApp> {
     _controllerMessage = TextEditingController();
   }
 
-  Future<void> _sendSMS(List<String> recipients) async {
+  void _sendSMS(List<String> recipents) async {
     try {
       String _result = await sendSMS(
-          message: _controllerMessage.text, recipients: recipients);
+          message: _controllerMessage.text, recipients: recipents);
       setState(() => _message = _result);
     } catch (error) {
       setState(() => _message = error.toString());
     }
   }
 
-  Future<bool> _canSendSMS() async {
+  void _sendSMSSilently(List<String> recipents) async {
+    try {
+      String _result = await sendSMSSilently(
+          message: _controllerMessage.text, recipients: recipents);
+      setState(() => _message = _result);
+    } catch (error) {
+      setState(() => _message = error.toString());
+    }
+  }
+
+  void _canSendSMS() async {
     bool _result = await canSendSMS();
     setState(() => _canSendSMSMessage =
         _result ? 'This unit can send SMS' : 'This unit cannot send SMS');
-    return _result;
   }
 
   Widget _phoneTile(String name) {
     return Padding(
-      padding: const EdgeInsets.all(3),
+      padding: const EdgeInsets.all(3.0),
       child: Container(
           decoration: BoxDecoration(
               border: Border(
-            bottom: BorderSide(color: Colors.grey.shade300),
-            top: BorderSide(color: Colors.grey.shade300),
-            left: BorderSide(color: Colors.grey.shade300),
-            right: BorderSide(color: Colors.grey.shade300),
+            bottom: BorderSide(color: Colors.grey[300]),
+            top: BorderSide(color: Colors.grey[300]),
+            left: BorderSide(color: Colors.grey[300]),
+            right: BorderSide(color: Colors.grey[300]),
           )),
           child: Padding(
-            padding: const EdgeInsets.all(4),
+            padding: EdgeInsets.all(4.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close),
                   onPressed: () => setState(() => people.remove(name)),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(0),
+                  padding: const EdgeInsets.all(0.0),
                   child: Text(
                     name,
-                    textScaleFactor: 1,
-                    style: const TextStyle(fontSize: 12),
+                    textScaleFactor: 1.0,
+                    style: TextStyle(fontSize: 12.0),
                   ),
                 )
               ],
@@ -89,32 +125,33 @@ class _MyAppState extends State<MyApp> {
         ),
         body: ListView(
           children: <Widget>[
-            if (people == null || people.isEmpty)
-              const SizedBox(height: 0)
-            else
-              SizedBox(
-                height: 90,
-                child: Padding(
-                  padding: const EdgeInsets.all(3),
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: List<Widget>.generate(people.length, (int index) {
-                      return _phoneTile(people[index]);
-                    }),
+            people == null || people.isEmpty
+                ? Container(
+                    height: 0.0,
+                  )
+                : Container(
+                    height: 90.0,
+                    child: Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children:
+                            List<Widget>.generate(people.length, (int index) {
+                          return _phoneTile(people[index]);
+                        }),
+                      ),
+                    ),
                   ),
-                ),
-              ),
             ListTile(
-              leading: const Icon(Icons.people),
+              leading: Icon(Icons.people),
               title: TextField(
                 controller: _controllerPeople,
-                decoration:
-                    const InputDecoration(labelText: 'Add Phone Number'),
+                decoration: InputDecoration(labelText: "Add Phone Number"),
                 keyboardType: TextInputType.number,
                 onChanged: (String value) => setState(() {}),
               ),
               trailing: IconButton(
-                icon: const Icon(Icons.add),
+                icon: Icon(Icons.add),
                 onPressed: _controllerPeople.text.isEmpty
                     ? null
                     : () => setState(() {
@@ -123,55 +160,62 @@ class _MyAppState extends State<MyApp> {
                         }),
               ),
             ),
-            const Divider(),
+            Divider(),
             ListTile(
-              leading: const Icon(Icons.message),
+              leading: Icon(Icons.message),
               title: TextField(
-                decoration: const InputDecoration(labelText: 'Add Message'),
+                decoration: InputDecoration(labelText: " Add Message"),
                 controller: _controllerMessage,
                 onChanged: (String value) => setState(() {}),
               ),
             ),
-            const Divider(),
+            Divider(),
             ListTile(
-              title: const Text('Can send SMS'),
+              title: Text("Can send SMS"),
               subtitle: Text(_canSendSMSMessage),
               trailing: IconButton(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                icon: const Icon(Icons.check),
+                padding: EdgeInsets.symmetric(vertical: 16),
+                icon: Icon(Icons.check),
                 onPressed: () {
                   _canSendSMS();
                 },
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8),
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.resolveWith(
-                      (states) => Theme.of(context).accentColor),
-                  padding: MaterialStateProperty.resolveWith(
-                      (states) => const EdgeInsets.symmetric(vertical: 16)),
-                ),
+              padding: const EdgeInsets.all(8.0),
+              child: RaisedButton(
+                color: Theme.of(context).accentColor,
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text("SEND",
+                    style: Theme.of(context).accentTextTheme.button),
                 onPressed: () {
                   _send();
                 },
-                child: Text(
-                  'SEND',
-                  style: Theme.of(context).accentTextTheme.button,
-                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RaisedButton(
+                color: Theme.of(context).accentColor,
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text("Send Silently",
+                    style: Theme.of(context).accentTextTheme.button),
+                onPressed: () {
+                  _sendSilently();
+                },
               ),
             ),
             Visibility(
               visible: _message != null,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(12.0),
                       child: Text(
-                        _message ?? 'No Data',
+                        _message ?? "No Data",
                         maxLines: null,
                       ),
                     ),
@@ -185,9 +229,17 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  void _sendSilently() {
+    if (people == null || people.isEmpty) {
+      setState(() => _message = "At Least 1 Person or Message Required");
+    } else {
+      _sendSMSSilently(people);
+    }
+  }
+
   void _send() {
-    if (people.isEmpty) {
-      setState(() => _message = 'At Least 1 Person or Message Required');
+    if (people == null || people.isEmpty) {
+      setState(() => _message = "At Least 1 Person or Message Required");
     } else {
       _sendSMS(people);
     }

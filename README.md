@@ -45,6 +45,16 @@ void _sendSMS(String message, List<String> recipents) async {
     });
 print(_result);
 }
+
+OR
+
+void _sendSMSSilently(String message, List<String> recipents) async {
+ String _result = await sendSMSSilently(message: message, recipients: recipents)
+        .catchError((onError) {
+      print(onError);
+    });
+print(_result);
+}
 ```
 
 You can quickly send the message with this function.

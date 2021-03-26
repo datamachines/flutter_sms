@@ -52,6 +52,23 @@ class FlutterSmsPlatform extends PlatformInterface {
     }
   }
 
+  Future<String> sendSMSSilently({
+    @required String message,
+    @required List<String> recipients,
+  }) {
+    var mapData = Map<dynamic, dynamic>();
+    mapData["message"] = message;
+    if (!kIsWeb && Platform.isIOS) {
+      mapData["recipients"] = recipients;
+      return _channel.invokeMethod<String>('sendSMSSilently', mapData);
+    } else {
+      String _phones = recipients.join(";");
+      mapData["recipients"] = _phones;
+      return _channel.invokeMethod<String>('sendSMSSilently', mapData);
+    }
+  }
+
+
   Future<bool> canSendSMS() {
     return _channel
         .invokeMethod<bool>('canSendSMS')

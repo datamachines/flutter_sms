@@ -12,6 +12,14 @@ Future<String> sendSMS({
     FlutterSmsPlatform.instance
         .sendSMS(message: message, recipients: recipients);
 
+/// Open SMS Dialog on iOS/Android/Web
+Future<String> sendSMSSilently({
+  @required String message,
+  @required List<String> recipients,
+}) =>
+    FlutterSmsPlatform.instance
+        .sendSMSSilently(message: message, recipients: recipients);
+
 /// Launch SMS Url Scheme on all platforms
 Future<bool> launchSms({
   String? message,

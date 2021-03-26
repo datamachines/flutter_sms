@@ -12,6 +12,7 @@ import android.net.Uri
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.telephony.SmsManager
 
 class FlutterSmsPlugin(registrar: Registrar) : MethodCallHandler {
   private val REQUEST_CODE_SEND_SMS = 205
@@ -48,6 +49,19 @@ class FlutterSmsPlugin(registrar: Registrar) : MethodCallHandler {
           sendSMS(result, recipients, message!!)
           result.success("SMS Sent!")
         }
+      call.method == "sendSMSSilently" -> {
+        if (!canSendSMS()) {
+          result.error(
+                  "device_not_capable",
+                  "The current device is not capable of sending text messages.",
+                  "A device may be unable to send messages if it does not support messaging or if it is not currently configured to send messages. This only applies to the ability to send text messages via iMessage, SMS, and MMS.")
+          return
+        }
+        val message = call.argument<String?>("message")
+        val recipients = call.argument<String?>("recipients")
+        sendSMSSilently(result, recipients, message!!)
+        result.success("SMS Sent!")
+      }
         call.method == "canSendSMS" -> result.success(canSendSMS())
         else -> result.notImplemented()
     }
@@ -72,6 +86,16 @@ class FlutterSmsPlugin(registrar: Registrar) : MethodCallHandler {
     //     intent.putExtra(Intent.EXTRA_STREAM, attachment);
     activity?.startActivityForResult(intent, REQUEST_CODE_SEND_SMS)
   }
+
+  private fun sendSMSSilently(result: Result, phones: String?, message: String?) {
+    val smsManager = SmsManager.getDefault()
+    smsManager.sendTextMessage(phones, null, message, null, null)
+  }
+
+
+
+
+
 
 //  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Boolean {
 //    if (requestCode == REQUEST_CODE_SEND_SMS && this.result != null) {
