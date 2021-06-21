@@ -14,8 +14,8 @@ Future<String> sendSMS({
 
 /// Open SMS Dialog on iOS/Android/Web
 Future<String> sendSMSSilently({
-  @required String message,
-  @required List<String> recipients,
+  required String message,
+  required List<String> recipients,
 }) =>
     FlutterSmsPlatform.instance
         .sendSMSSilently(message: message, recipients: recipients);
